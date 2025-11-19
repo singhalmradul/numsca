@@ -1,4 +1,4 @@
-import Dependencies._
+import Dependencies.*
 
 ThisBuild / scalaVersion := "3.3.7"
 ThisBuild / version := "0.1.7"
@@ -10,7 +10,7 @@ lazy val root = (project in file(".")).settings(
     "org.nd4j" % "nd4j-native-platform" % "0.9.1",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6",
     "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "org.scalatest" %% "scalatest" % "3.2.19" % Test
+    scalaTest % Test
   ),
   publishTo := sonatypePublishToBundle.value,
   pomIncludeRepository := { _ => false },
