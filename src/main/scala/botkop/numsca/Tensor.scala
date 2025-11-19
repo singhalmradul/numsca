@@ -6,7 +6,7 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.indexing.{INDArrayIndex, NDArrayIndex}
 import org.nd4j.linalg.ops.transforms.Transforms
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.language.{implicitConversions, postfixOps}
 
 class Tensor(val array: INDArray, val isBoolean: Boolean = false)
@@ -17,8 +17,8 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
   def copy(): Tensor = new Tensor(array.dup())
 
   def shape: Array[Int] = array.shape()
-  def reshape(newShape: Array[Int]) = new Tensor(array.reshape(newShape: _*))
-  def reshape(newShape: Int*) = new Tensor(array.reshape(newShape: _*))
+  def reshape(newShape: Array[Int]) = new Tensor(array.reshape(newShape*))
+  def reshape(newShape: Int*) = new Tensor(array.reshape(newShape*))
   def shapeLike(t: Tensor): Tensor = reshape(t.shape)
 
   def transpose() = new Tensor(array.transpose())
@@ -33,29 +33,29 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
   def round: Tensor =
     Tensor(data.map(math.round(_).toDouble)).reshape(this.shape)
 
-  def dot(other: Tensor) = new Tensor(array mmul other.array)
+  infix def dot(other: Tensor) = new Tensor(array `mmul` other.array)
 
-  def unary_- : Tensor = new Tensor(array mul -1)
-  def +(d: Double): Tensor = new Tensor(array add d)
-  def -(d: Double): Tensor = new Tensor(array sub d)
-  def *(d: Double): Tensor = new Tensor(array mul d)
+  def unary_- : Tensor = new Tensor(array `mul` -1)
+  def +(d: Double): Tensor = new Tensor(array `add` d)
+  def -(d: Double): Tensor = new Tensor(array `sub` d)
+  def *(d: Double): Tensor = new Tensor(array `mul` d)
   def **(d: Double): Tensor = power(this, d)
-  def /(d: Double): Tensor = new Tensor(array div d)
-  def %(d: Double): Tensor = new Tensor(array fmod d)
+  def /(d: Double): Tensor = new Tensor(array `div` d)
+  def %(d: Double): Tensor = new Tensor(array `fmod` d)
 
-  def +=(d: Double): Unit = array addi d
-  def -=(d: Double): Unit = array subi d
-  def *=(d: Double): Unit = array muli d
+  def +=(d: Double): Unit = array `addi` d
+  def -=(d: Double): Unit = array `subi` d
+  def *=(d: Double): Unit = array `muli` d
   def **=(d: Double): Unit = array.assign(Transforms.pow(array, d))
-  def /=(d: Double): Unit = array divi d
-  def %=(d: Double): Unit = array fmodi d
+  def /=(d: Double): Unit = array `divi` d
+  def %=(d: Double): Unit = array `fmodi` d
 
-  def >(d: Double): Tensor = new Tensor(array gt d, true)
-  def >=(d: Double): Tensor = new Tensor(array gte d, true)
-  def <(d: Double): Tensor = new Tensor(array lt d, true)
-  def <=(d: Double): Tensor = new Tensor(array lte d, true)
-  def ==(d: Double): Tensor = new Tensor(array eq d, true)
-  def !=(d: Double): Tensor = new Tensor(array neq d, true)
+  def >(d: Double): Tensor = new Tensor(array `gt` d, true)
+  def >=(d: Double): Tensor = new Tensor(array `gte` d, true)
+  def <(d: Double): Tensor = new Tensor(array `lt` d, true)
+  def <=(d: Double): Tensor = new Tensor(array `lte` d, true)
+  def ==(d: Double): Tensor = new Tensor(array `eq` d, true)
+  def !=(d: Double): Tensor = new Tensor(array `neq` d, true)
 
   def +(other: Tensor): Tensor = Ops.add(this, other)
   def -(other: Tensor): Tensor = Ops.sub(this, other)
@@ -80,19 +80,18 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
     new Tensor(Transforms.max(this.array.add(other.array), 1.0), true)
   }
 
-  /**
-    * broadcast argument tensor with shape of this tensor
+  /** broadcast argument tensor with shape of this tensor
     */
-  private def bc(t: Tensor): INDArray = t.array.broadcast(shape: _*)
+  private def bc(t: Tensor): INDArray = t.array.broadcast(shape*)
 
-  def +=(t: Tensor): Unit = array addi bc(t)
-  def -=(t: Tensor): Unit = array subi bc(t)
-  def *=(t: Tensor): Unit = array muli bc(t)
-  def /=(t: Tensor): Unit = array divi bc(t)
-  def %=(t: Tensor): Unit = array fmodi bc(t)
+  def +=(t: Tensor): Unit = array `addi` bc(t)
+  def -=(t: Tensor): Unit = array `subi` bc(t)
+  def *=(t: Tensor): Unit = array `muli` bc(t)
+  def /=(t: Tensor): Unit = array `divi` bc(t)
+  def %=(t: Tensor): Unit = array `fmodi` bc(t)
 
-  def :=(t: Tensor): Unit = array assign t.array
-  def :=(d: Double): Unit = array assign d
+  def :=(t: Tensor): Unit = array `assign` t.array
+  def :=(d: Double): Unit = array `assign` d
 
   def maximum(other: Tensor): Tensor = Ops.max(this, other)
   def maximum(d: Double): Tensor = new Tensor(Transforms.max(this.array, d))
@@ -109,43 +108,41 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
     require(shape.product == 1)
     array.getDouble(0)
   }
-  def squeeze(index: Array[Int]): Double = array.getDouble(index: _*)
+  def squeeze(index: Array[Int]): Double = array.getDouble(index*)
   def squeeze(index: Int*): Double = squeeze(index.toArray)
 
-  /**
-    * returns a view
+  /** returns a view
     */
   def apply(index: Array[Int]): Tensor = {
     val ix = index.map(NDArrayIndex.point)
-    new Tensor(array.get(ix: _*))
+    new Tensor(array.get(ix*))
   }
 
-  /**
-    * returns a view
+  /** returns a view
     */
   def apply(index: Int*): Tensor = apply(index.toArray)
 
   private def handleNegIndex(i: Int, shapeIndex: Int) =
-    if (i < 0) shape(shapeIndex) + i else i
+    if i < 0 then shape(shapeIndex) + i else i
 
-  /**
-    * returns a view
+  /** returns a view
     */
   def apply(ranges: NumscaRange*)(implicit dummy: Int = 0): Tensor = {
 
-    val indexes: Seq[INDArrayIndex] = ranges.zipWithIndex.map {
-      case (nr, i) =>
-        nr.to match {
-          case None if nr.from == 0 =>
-            NDArrayIndex.all()
-          case None =>
-            NDArrayIndex.interval(handleNegIndex(nr.from, i), shape(i))
-          case Some(n) =>
-            NDArrayIndex.interval(handleNegIndex(nr.from, i),
-                                  handleNegIndex(n, i))
-        }
+    val indexes: Seq[INDArrayIndex] = ranges.zipWithIndex.map { case (nr, i) =>
+      nr.to match {
+        case None if nr.from == 0 =>
+          NDArrayIndex.all()
+        case None =>
+          NDArrayIndex.interval(handleNegIndex(nr.from, i), shape(i))
+        case Some(n) =>
+          NDArrayIndex.interval(
+            handleNegIndex(nr.from, i),
+            handleNegIndex(n, i)
+          )
+      }
     }
-    new Tensor(array.get(indexes: _*))
+    new Tensor(array.get(indexes*))
   }
 
   def apply(selection: Tensor*): TensorSelection = {
@@ -154,11 +151,12 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
   }
 
   private def selectIndexes(
-      selection: Seq[Tensor]): (Array[Array[Int]], Option[Array[Int]]) = {
-    if (selection.length == 1) {
-      if (selection.head.isBoolean) {
+      selection: Seq[Tensor]
+  ): (Array[Array[Int]], Option[Array[Int]]) = {
+    if selection.length == 1 then {
+      if selection.head.isBoolean then {
         (indexByBooleanTensor(selection.head), None)
-      } else if (rank == 2 && shape.head == 1) {
+      } else if rank == 2 && shape.head == 1 then {
         (indexByTensor(selection.head), Some(selection.head.shape))
       } else {
         throw new NotImplementedError()
@@ -169,15 +167,19 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
   }
 
   private def multiIndex(selection: Seq[Tensor]): Array[Array[Int]] = {
-    require(selection.forall(s => s.shape.head == 1),
-            s"shapes must be [1, n] (was: ${selection.map(_.shape.toList)}")
+    require(
+      selection.forall(s => s.shape.head == 1),
+      s"shapes must be [1, n] (was: ${selection.map(_.shape.toList)}"
+    )
 
     // broadcast selection to same shape
-    val ts: Seq[INDArray] = Ops.tbc(selection: _*)
+    val ts: Seq[INDArray] = Ops.tbc(selection*)
 
     val rank = ts.head.shape()(1)
-    require(ts.forall(s => s.shape()(1) == rank),
-            s"shapes must be of rank $rank (was ${ts.map(_.shape().toList)}")
+    require(
+      ts.forall(s => s.shape()(1) == rank),
+      s"shapes must be of rank $rank (was ${ts.map(_.shape().toList)}"
+    )
 
     (0 until rank).map { r =>
       ts.map(s => s.getInt(0, r)).toArray
@@ -189,8 +191,8 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
     require(t.isBoolean)
     require(t sameShape this)
 
-    new NdIndexIterator(t.shape: _*).asScala.filterNot { ii: Array[Int] =>
-      t.array.getDouble(ii: _*) == 0
+    new NdIndexIterator(t.shape*).asScala.filterNot { ii =>
+      t.array.getDouble(ii*) == 0
     } toArray
   }
 
@@ -198,16 +200,15 @@ class Tensor(val array: INDArray, val isBoolean: Boolean = false)
     t.array.data().asInt().map(i => Array(0, i))
   }
 
-  def sameShape(other: Tensor): Boolean = shape sameElements other.shape
+  infix def sameShape(other: Tensor): Boolean = shape sameElements other.shape
   def sameElements(other: Tensor): Boolean = data sameElements other.data
 
   def rank: Int = array.rank()
 
   def clip(min: Double, max: Double): Tensor =
     Tensor(array.data().asDouble().map { x =>
-      if (x < min) min
-      else if (x > max)
-        max
+      if x < min then min
+      else if x > max then max
       else x
     }).reshape(shape)
 
@@ -230,16 +231,16 @@ object Tensor {
 
 }
 
-case class TensorSelection(t: Tensor,
-                           indexes: Array[Array[Int]],
-                           shape: Option[Array[Int]]) {
+case class TensorSelection(
+    t: Tensor,
+    indexes: Array[Array[Int]],
+    shape: Option[Array[Int]]
+) {
 
   def asTensor: Tensor = {
-    val newData = indexes.map(ix => t.array.getDouble(ix: _*))
-    if (shape.isDefined)
-      Tensor(newData).reshape(shape.get)
-    else
-      Tensor(newData)
+    val newData = indexes.map(ix => t.array.getDouble(ix*))
+    if shape.isDefined then Tensor(newData).reshape(shape.get)
+    else Tensor(newData)
   }
 
   def :=(d: Double): Unit = indexes.foreach(t(_) := d)

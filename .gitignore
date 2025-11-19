@@ -11,3 +11,8 @@ project/target
 *~
 .ipynb_checkpoints
 venv
+
+.metals/
+.vscode/
+.bloop/
+.bsp/

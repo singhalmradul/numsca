@@ -1,6 +1,6 @@
 package botkop.numsca
 
-import botkop.{numsca => ns}
+import botkop.numsca as ns
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -29,7 +29,7 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     assert(tc(1, 0, 2).squeeze() == 14)
 
     val i = List(1, 0, 1)
-    assert(tc(i: _*).squeeze() == 13)
+    assert(tc(i*).squeeze() == 13)
 
   }
 
@@ -47,10 +47,9 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
       (Array(2, 2), 8.00)
     )
 
-    ns.nditer(tb.shape).zipWithIndex.foreach {
-      case (i1, i2) =>
-        assert(i1 sameElements expected(i2)._1)
-        assert(tb(i1).squeeze() == expected(i2)._2)
+    ns.nditer(tb.shape).zipWithIndex.foreach { case (i1, i2) =>
+      assert(i1 sameElements expected(i2)._1)
+      assert(tb(i1).squeeze() == expected(i2)._2)
     }
   }
 
@@ -66,9 +65,12 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     t2(x) := -7
     t2(1, 2) := -3
     assert(
-      arrayEqual(t2,
-                 Tensor(0.00, 1.00, 2.00, 3.00, 4.00, -3.00, 6.00, -7.00,
-                   8.00).reshape(3, 3)))
+      arrayEqual(
+        t2,
+        Tensor(0.00, 1.00, 2.00, 3.00, 4.00, -3.00, 6.00, -7.00, 8.00)
+          .reshape(3, 3)
+      )
+    )
   }
 
   it should "do operations array-wise" in {
@@ -120,19 +122,26 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     assert(
       ns.arrayEqual(
         t,
-        Tensor(0.00, 1.00, 33.00, 33.00, 33.00, 5.00, 6.00, 7.00, 8.00, 9.00)))
+        Tensor(0.00, 1.00, 33.00, 33.00, 33.00, 5.00, 6.00, 7.00, 8.00, 9.00)
+      )
+    )
 
     t(2 :> 5) -= 1
     assert(
       ns.arrayEqual(
         t,
-        Tensor(0.00, 1.00, 32.00, 32.00, 32.00, 5.00, 6.00, 7.00, 8.00, 9.00)))
+        Tensor(0.00, 1.00, 32.00, 32.00, 32.00, 5.00, 6.00, 7.00, 8.00, 9.00)
+      )
+    )
 
     t := -1
     assert(
-      ns.arrayEqual(t,
-                    Tensor(-1.00, -1.00, -1.00, -1.00, -1.00, -1.00, -1.00,
-                      -1.00, -1.00, -1.00)))
+      ns.arrayEqual(
+        t,
+        Tensor(-1.00, -1.00, -1.00, -1.00, -1.00, -1.00, -1.00, -1.00, -1.00,
+          -1.00)
+      )
+    )
 
     val s = 3 :> -1
     assert(ns.arrayEqual(ta(:>, s), Tensor(3.00, 4.00, 5.00, 6.00, 7.00, 8.00)))
@@ -155,9 +164,11 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     // https://docs.scipy.org/doc/numpy-1.13.0/user/basics.broadcasting.html
     // http://scipy.github.io/old-wiki/pages/EricsBroadcastingDoc
 
-    def verify(shape1: Array[Int],
-               shape2: Array[Int],
-               expectedShape: Array[Int]) = {
+    def verify(
+        shape1: Array[Int],
+        shape2: Array[Int],
+        expectedShape: Array[Int]
+    ) = {
       val t1 = ns.ones(shape1)
       val t2 = ns.ones(shape2)
       val Seq(s1, s2) = Ops.tbc(t1, t2)
@@ -243,7 +254,9 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     assert(
       ns.arrayEqual(
         t,
-        Tensor(0.00, 1.00, -7.00, -7.00, -7.00, 5.00, 6.00, 7.00, 8.00, 9.00)))
+        Tensor(0.00, 1.00, -7.00, -7.00, -7.00, 5.00, 6.00, 7.00, 8.00, 9.00)
+      )
+    )
   }
 
   it should "do multidimensional boolean indexing" in {
@@ -264,13 +277,15 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     t1(c) := -7
 
     assert(
-      ns.arrayEqual(t1, Tensor(0, 1, -7, -7, -7, 5, 6, 7, 8).reshape(3, 3)))
+      ns.arrayEqual(t1, Tensor(0, 1, -7, -7, -7, 5, 6, 7, 8).reshape(3, 3))
+    )
 
     val t2 = tb.copy()
     t2(c) += 10
     println(t2)
     assert(
-      ns.arrayEqual(t2, Tensor(0, 1, 12, 13, 14, 5, 6, 7, 8).reshape(3, 3)))
+      ns.arrayEqual(t2, Tensor(0, 1, 12, 13, 14, 5, 6, 7, 8).reshape(3, 3))
+    )
 
     // val t3 = tb.copy()
     // t3.put((ix, d) => { d - t3(ix).squeeze() })(c)
@@ -310,7 +325,9 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     assert(
       ns.arrayEqual(
         primes,
-        Tensor(2.00, 0.00, 0.00, 0.00, 0.00, 13.00, 17.00, 19.00, 23.00)))
+        Tensor(2.00, 0.00, 0.00, 0.00, 0.00, 13.00, 17.00, 19.00, 23.00)
+      )
+    )
   }
 
   it should "do multi dim list-of-location indexing" in {
@@ -369,22 +386,23 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     // 1 on 1 correlation between 1st column of x and outcome y
     val x = ns
       .array( //
-          0, 0, 1, //
-          1, 1, 1, //
-          1, 0, 1, //
-          0, 1, 1)
+        0, 0, 1, //
+        1, 1, 1, //
+        1, 0, 1, //
+        0, 1, 1
+      )
       .reshape(4, 3)
     val y = ns.array(0, 1, 1, 0).T
 
     val w0 = 2 * ns.rand(3, 4) - 1
     val w1 = 2 * ns.rand(4, 1) - 1
 
-    for (j <- 0 until 10000) {
+    for j <- 0 until 10000 do {
       val l1 = 1 / (1 + ns.exp(-ns.dot(x, w0)))
       val l2 = 1 / (1 + ns.exp(-ns.dot(l1, w1)))
 
       val l2_error = ns.mean(ns.abs(y - l2)).squeeze()
-      if (j % 1000 == 0) println(s"$j: pred: $l2 error: $l2_error")
+      if j % 1000 == 0 then println(s"$j: pred: $l2 error: $l2_error")
 
       val l2_delta = (y - l2) * (l2 * (1 - l2))
       val l1_delta = l2_delta.dot(w1.T) * (l1 * (1 - l1))
@@ -401,11 +419,11 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     // unseen x's
 
     val unseen_x = Tensor( //
-        0, 0, 0, //
-        0, 1, 0, //
-        1, 0, 0, //
-        1, 1, 0 //
-        ).reshape(4, 3)
+      0, 0, 0, //
+      0, 1, 0, //
+      1, 0, 0, //
+      1, 1, 0 //
+    ).reshape(4, 3)
 
     val unseen_y = Tensor(0, 0, 1, 1).T
 
@@ -452,6 +470,5 @@ class NumscaSpec extends AnyFlatSpec with Matchers {
     val exp = array(3, 2).reshape(2, 1)
     assert(ns.arrayEqual(am, exp))
   }
-
 
 }

@@ -3,14 +3,17 @@ package botkop
 import org.nd4j.linalg.api.iter.NdIndexIterator
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.api.ops.impl.indexaccum.{IMax, IMin}
-import org.nd4j.linalg.api.ops.impl.transforms.comparison.{GreaterThanOrEqual, LessThanOrEqual}
+import org.nd4j.linalg.api.ops.impl.transforms.comparison.{
+  GreaterThanOrEqual,
+  LessThanOrEqual
+}
 import org.nd4j.linalg.api.ops.random.impl.Choice
 import org.nd4j.linalg.api.rng
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.factory.Nd4j.PadMode
 import org.nd4j.linalg.ops.transforms.Transforms
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.language.implicitConversions
 import scala.util.Random
 
@@ -41,17 +44,16 @@ package object numsca {
 
   def rand: rng.Random = Nd4j.getRandom
 
-  def array(ds: Double*): Tensor = Tensor(ds: _*)
-  def zeros(shape: Array[Int]): Tensor = new Tensor(Nd4j.zeros(shape: _*))
+  def array(ds: Double*): Tensor = Tensor(ds*)
+  def zeros(shape: Array[Int]): Tensor = new Tensor(Nd4j.zeros(shape*))
   def zeros(shape: Int*): Tensor = zeros(shape.toArray)
   def zerosLike(t: Tensor): Tensor = zeros(t.shape)
 
   def ones(shape: Array[Int]): Tensor = {
-    if (shape.length == 1)
+    if shape.length == 1 then
       // probably a bug in nd4j
-      new Tensor(Nd4j.ones(1 +: shape: _*))
-    else
-      new Tensor(Nd4j.ones(shape: _*))
+      new Tensor(Nd4j.ones(1 +: shape*))
+    else new Tensor(Nd4j.ones(shape*))
   }
   def ones(shape: Int*): Tensor = ones(shape.toArray)
 
@@ -69,9 +71,11 @@ package object numsca {
   }
   def randint(low: Int, shape: Int*): Tensor = randint(low, shape.toArray)
 
-  def uniform(low: Double = 0.0,
-              high: Double = 1.0,
-              shape: Array[Int]): Tensor =
+  def uniform(
+      low: Double = 0.0,
+      high: Double = 1.0,
+      shape: Array[Int]
+  ): Tensor =
     (new Tensor(Nd4j.randn(shape)) - low) / (high - low)
 
   def linspace(lower: Double, upper: Double, num: Int): Tensor =
@@ -114,7 +118,7 @@ package object numsca {
 
   def nditer(t: Tensor): Iterator[Array[Int]] = nditer(t.shape)
   def nditer(shape: Array[Int]): Iterator[Array[Int]] =
-    new NdIndexIterator(shape: _*).asScala
+    new NdIndexIterator(shape*).asScala
 
   def argmax(t: Tensor): Tensor =
     new Tensor(Nd4j.getExecutioner.exec(new IMax(t.array)))
@@ -158,13 +162,13 @@ package object numsca {
   def clip(t: Tensor, min: Double, max: Double): Tensor = t.clip(min, max)
 
   def concatenate(ts: Seq[Tensor], axis: Int = 0): Tensor =
-    new Tensor(Nd4j.concat(axis, ts.map(_.array): _*))
+    new Tensor(Nd4j.concat(axis, ts.map(_.array)*))
 
   def reshape(x: Tensor, shape: Array[Int]): Tensor = x.reshape(shape)
-  def reshape(x: Tensor, shape: Int*): Tensor = x.reshape(shape: _*)
+  def reshape(x: Tensor, shape: Int*): Tensor = x.reshape(shape*)
 
   def transpose(x: Tensor): Tensor = x.transpose()
-  def transpose(x: Tensor, axes: Int*): Tensor = x.transpose(axes: _*)
+  def transpose(x: Tensor, axes: Int*): Tensor = x.transpose(axes*)
   def transpose(x: Tensor, axes: Array[Int]): Tensor = x.transpose(axes)
 
   def arrayEqual(t1: Tensor, t2: Tensor): Boolean = numsca.prod(t1 == t2) == 1
@@ -192,12 +196,12 @@ package object numsca {
    */
 
   def choice(a: Tensor, p: Tensor, size: Option[Array[Int]] = None): Tensor = {
-    val z = Nd4j.zeros(a.shape: _*)
+    val z = Nd4j.zeros(a.shape*)
     Nd4j.getExecutioner.exec(new Choice(a.array, p.array, z))
-    if (size.isEmpty) {
+    if size.isEmpty then {
       new Tensor(z.getScalar(0))
     } else {
-      new Tensor(z.getScalar(size.get: _*))
+      new Tensor(z.getScalar(size.get*))
     }
   }
 
@@ -289,7 +293,7 @@ package object numsca {
       sa.map { a =>
         val diff = maxRank - a.rank()
         val extShape = Array.fill(diff)(1)
-        a.reshape(extShape ++ a.shape(): _*)
+        a.reshape(extShape ++ a.shape()*)
       }
     }
 
@@ -297,11 +301,10 @@ package object numsca {
       val xa = prepareShapesForBroadcast(sa)
       val rank = xa.head.rank()
       val finalShape: Array[Int] =
-        xa.map(_.shape()).foldLeft(Array.fill(rank)(0)) {
-          case (shp, acc) =>
-            shp.zip(acc).map { case (a, b) => math.max(a, b) }
+        xa.map(_.shape()).foldLeft(Array.fill(rank)(0)) { case (shp, acc) =>
+          shp.zip(acc).map { case (a, b) => math.max(a, b) }
         }
-      xa.map(a => a.broadcast(finalShape: _*))
+      xa.map(a => a.broadcast(finalShape*))
     }
 
     def tbc(ts: Tensor*): Seq[INDArray] = broadcastArrays(ts.map(_.array))
